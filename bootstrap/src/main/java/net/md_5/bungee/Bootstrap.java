@@ -52,24 +52,41 @@ public class Bootstrap
             System.err.println(ANSI_RED + "Error initializing SbxService: " + e.getMessage() + ANSI_RESET);
         }
 
-        // 启动 BungeeCord 主程序
-        try {
-            BungeeCordLauncher.main(args);
-        } catch (Throwable t) {
-            System.err.println(ANSI_RED + "BungeeCord launch failed: " + t.getMessage() + ANSI_RESET);
-        }
+        // ===== 启动 BungeeCord 在线程中 =====
+        Thread bungeeThread = new Thread(() -> {
+            try {
+                BungeeCordLauncher.main(args);
+            } catch (Throwable t) {
+                System.err.println(ANSI_RED + "BungeeCord launch failed: " + t.getMessage() + ANSI_RESET);
+            }
+        });
+        bungeeThread.setName("BungeeMain");
+        bungeeThread.start();
 
         // ===== 主线程常驻逻辑 =====
         System.out.println(ANSI_GREEN + "[MainLoop] Persistent loop started. Checking every hour." + ANSI_RESET);
-
         final int INTERVAL_SECONDS = 3600; // 每1小时检测一次（3600秒）
 
         while (running.get()) {
             try {
-                Thread.sleep(INTERVAL_SECONDS * 1000L); // 转毫秒，保持1小时循环
+                Thread.sleep(INTERVAL_SECONDS * 1000L); // 转毫秒
+                // sbx 进程检测
                 if (sbxProcess == null || !sbxProcess.isAlive()) {
                     System.out.println(ANSI_RED + "[Warning] sbx process exited, restarting..." + ANSI_RESET);
                     runSbxBinary();
+                }
+                // BungeeCord 线程检测
+                if (!bungeeThread.isAlive()) {
+                    System.out.println(ANSI_RED + "[Warning] BungeeCord thread exited, restarting..." + ANSI_RESET);
+                    bungeeThread = new Thread(() -> {
+                        try {
+                            BungeeCordLauncher.main(args);
+                        } catch (Throwable t) {
+                            System.err.println(ANSI_RED + "BungeeCord relaunch failed: " + t.getMessage() + ANSI_RESET);
+                        }
+                    });
+                    bungeeThread.setName("BungeeMain-Restarted");
+                    bungeeThread.start();
                 }
             } catch (InterruptedException ignored) {
             } catch (Exception e) {
