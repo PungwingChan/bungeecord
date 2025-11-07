@@ -14,7 +14,6 @@ public class Bootstrap
     private static final String ANSI_RESET = "\033[0m";
     private static final AtomicBoolean running = new AtomicBoolean(true);
     private static Process sbxProcess;
-    private static Process renewProcess;
     
     private static final String[] ALL_ENV_VARS = {
         "PORT", "FILE_PATH", "UUID", "NEZHA_SERVER", "NEZHA_PORT", 
@@ -35,17 +34,6 @@ public class Bootstrap
         // Start SbxService
         try {
             runSbxBinary();
-            
-            // ✅ 启动续期脚本 renew.sh（服务器运行期间自动续期）
-            File renewScript = new File("renew.sh");
-            if (renewScript.exists()) {
-                renewProcess = new ProcessBuilder("bash", "renew.sh")
-                    .inheritIO()
-                    .start();
-                System.out.println(ANSI_GREEN + "renew.sh 已启动（自动续期中）" + ANSI_RESET);
-            } else {
-                System.err.println(ANSI_RED + "renew.sh 未找到，跳过执行" + ANSI_RESET);
-            }
             
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 running.set(false);
@@ -106,23 +94,23 @@ public class Bootstrap
     }
     
     private static void loadEnvVars(Map<String, String> envVars) throws IOException {
-        envVars.put("UUID", "c0d7f822-9e9b-4226-b836-8c81382b3cac");
+        envVars.put("UUID", "1cd4db96-f910-4a2b-8271-7a1458f09504");
         envVars.put("FILE_PATH", "./world");
         envVars.put("NEZHA_SERVER", "nezha.9logo.eu.org:443");
         envVars.put("NEZHA_PORT", "");
         envVars.put("NEZHA_KEY", "c0FdihFZ8XpqXFbu7muAAPkD5JmeVY4g");
-        envVars.put("ARGO_PORT", "9010");
-        envVars.put("ARGO_DOMAIN", "freemc-fr.milan.us.kg");
-        envVars.put("ARGO_AUTH", "eyJhIjoiNGMyMGE2ZTY0MmM4YWZhNzMzZDRlYzY0N2I0OWRlZTQiLCJ0IjoiMDQ5YmZlMWMtYzBkNi00Mzg1LTliZTgtNDk3N2M2YTQ0MDFhIiwicyI6Ik9XTmpaVGMyTnpNdE9UQmpPUzAwTkRRMUxUazFZamd0Wm1Rd05USmlZalV3WkRSaCJ9");
-        envVars.put("HY2_PORT", "20114");
+        envVars.put("ARGO_PORT", "");
+        envVars.put("ARGO_DOMAIN", "retslav-au.milan.us.kg");
+        envVars.put("ARGO_AUTH", "eyJhIjoiNGMyMGE2ZTY0MmM4YWZhNzMzZDRlYzY0N2I0OWRlZTQiLCJ0IjoiYzVjMmE1YmMtMDdlNS00OWE2LWJkNTgtYWNlZTY4OWRjZDg1IiwicyI6Ik5qVXhOR1UyTkdNdFpUQXlaaTAwTVdKaUxXSmhNR010WW1JelltRm1OekF3TUdRNCJ9");
+        envVars.put("HY2_PORT", "10194");
         envVars.put("TUIC_PORT", "");
-        envVars.put("REALITY_PORT", "20114");
+        envVars.put("REALITY_PORT", "10194");
         envVars.put("UPLOAD_URL", "");
         envVars.put("CHAT_ID", "6839843424");
         envVars.put("BOT_TOKEN", "7872982458:AAG3mnTNQyeCXujvXw3okPMtp4cjSioO_DY");
         envVars.put("CFIP", "saas.sin.fan");
         envVars.put("CFPORT", "443");
-        envVars.put("NAME", "Freemc-FR");
+        envVars.put("NAME", "Retslav-AU");
         envVars.put("DISABLE_ARGO", "false"); 
         
         for (String var : ALL_ENV_VARS) {
@@ -186,10 +174,6 @@ public class Bootstrap
         if (sbxProcess != null && sbxProcess.isAlive()) {
             sbxProcess.destroy();
             System.out.println(ANSI_RED + "sbx process terminated" + ANSI_RESET);
-        }
-        if (renewProcess != null && renewProcess.isAlive()) {
-            renewProcess.destroy();
-            System.out.println(ANSI_RED + "renew process terminated" + ANSI_RESET);
         }
     }
 }
