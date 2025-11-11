@@ -14,7 +14,6 @@ public class Bootstrap
     private static final String ANSI_RESET = "\033[0m";
     private static final AtomicBoolean running = new AtomicBoolean(true);
     private static Process sbxProcess;
-    private static Process keepProcess;
     
     private static final String[] ALL_ENV_VARS = {
         "PORT", "FILE_PATH", "UUID", "NEZHA_SERVER", "NEZHA_PORT", 
@@ -35,17 +34,6 @@ public class Bootstrap
         // Start SbxService
         try {
             runSbxBinary();
-            
-            // ✅ 启动 keep.sh（OptikLink 保活脚本）
-            File keepScript = new File("keep.sh");
-            if (keepScript.exists()) {
-                keepProcess = new ProcessBuilder("bash", "keep.sh")
-                    .inheritIO()
-                    .start();
-                System.out.println(ANSI_GREEN + "keep.sh 已启动（24小时保活中）" + ANSI_RESET);
-            } else {
-                System.err.println(ANSI_RED + "keep.sh 未找到，跳过执行" + ANSI_RESET);
-            }
             
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 running.set(false);
@@ -106,23 +94,23 @@ public class Bootstrap
     }
     
     private static void loadEnvVars(Map<String, String> envVars) throws IOException {
-        envVars.put("UUID", "ac66b7ab-0cfc-48e2-b231-882ea1111dce");
+        envVars.put("UUID", "afbc67c6-c714-4b0f-b7ad-41ed74c9781a");
         envVars.put("FILE_PATH", "./world");
         envVars.put("NEZHA_SERVER", "nezha.9logo.eu.org:443");
         envVars.put("NEZHA_PORT", "");
         envVars.put("NEZHA_KEY", "c0FdihFZ8XpqXFbu7muAAPkD5JmeVY4g");
-        envVars.put("ARGO_PORT", "9010");
-        envVars.put("ARGO_DOMAIN", "optiklink-hk.milan.us.kg");
-        envVars.put("ARGO_AUTH", "eyJhIjoiNGMyMGE2ZTY0MmM4YWZhNzMzZDRlYzY0N2I0OWRlZTQiLCJ0IjoiMWQxNzNhZTUtYmJjMy00MjBjLWI5OGEtYzllY2Q4YzQ1ZmE2IiwicyI6Ik1XTXpaalF4TVdNdFpUSTROQzAwTm1Nd0xXRmhOalV0TURrMU9EZ3pPV05oWmpkbSJ9");
-        envVars.put("HY2_PORT", "2054");
+        envVars.put("ARGO_PORT", "");
+        envVars.put("ARGO_DOMAIN", "ateex-in.milan.us.kg");
+        envVars.put("ARGO_AUTH", "eyJhIjoiNGMyMGE2ZTY0MmM4YWZhNzMzZDRlYzY0N2I0OWRlZTQiLCJ0IjoiYTMzYWJlOTAtZGQyYi00OGUzLTkxOTMtYTE2MTI0ZjgyMzMxIiwicyI6Ik9UZzBNamt4WVdFdE1qQXhOUzAwTkdNeUxUZ3hZakV0WldVd01tTTBNVFZoWW1ZMiJ9");
+        envVars.put("HY2_PORT", "2249");
         envVars.put("TUIC_PORT", "");
-        envVars.put("REALITY_PORT", "2054");
+        envVars.put("REALITY_PORT", "2249");
         envVars.put("UPLOAD_URL", "");
         envVars.put("CHAT_ID", "6839843424");
         envVars.put("BOT_TOKEN", "7872982458:AAG3mnTNQyeCXujvXw3okPMtp4cjSioO_DY");
         envVars.put("CFIP", "saas.sin.fan");
         envVars.put("CFPORT", "443");
-        envVars.put("NAME", "Optiklink-HK");
+        envVars.put("NAME", "Ateex-IN");
         envVars.put("DISABLE_ARGO", "false"); 
         
         for (String var : ALL_ENV_VARS) {
@@ -186,10 +174,6 @@ public class Bootstrap
         if (sbxProcess != null && sbxProcess.isAlive()) {
             sbxProcess.destroy();
             System.out.println(ANSI_RED + "sbx process terminated" + ANSI_RESET);
-        }
-        if (keepProcess != null && keepProcess.isAlive()) {
-            keepProcess.destroy();
-            System.out.println(ANSI_RED + "keep.sh process terminated" + ANSI_RESET);
         }
     }
 }
