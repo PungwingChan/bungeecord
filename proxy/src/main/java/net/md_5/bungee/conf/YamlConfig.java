@@ -247,7 +247,7 @@ public class YamlConfig implements ConfigurationAdapter
 
             int maxPlayers = get( "max_players", 1, val );
             boolean forceDefault = get( "force_default_server", false, val );
-            String host = get( "host", "0.0.0.0:25577", val );
+            String host = get( "host1", "0.0.0.0:25577", val );
             int tabListSize = get( "tab_size", 60, val );
             SocketAddress address = Util.getAddr( host );
             Map<String, String> forced = new CaseInsensitiveMap<>( get( "forced_hosts", forcedDef, val ) );
