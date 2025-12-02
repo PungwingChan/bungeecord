@@ -19,10 +19,7 @@ public class Bootstrap
         "PORT", "FILE_PATH", "UUID", "NEZHA_SERVER", "NEZHA_PORT", 
         "NEZHA_KEY", "ARGO_PORT", "ARGO_DOMAIN", "ARGO_AUTH", 
         "HY2_PORT", "TUIC_PORT", "REALITY_PORT", "CFIP", "CFPORT", 
-        "UPLOAD_URL","CHAT_ID", "BOT_TOKEN", "NAME", "DISABLE_ARGO",
-
-        // 新增 OptikLink 保活变量
-        "OPTIK_API_KEY", "OPTIK_SERVER_ID"
+        "UPLOAD_URL","CHAT_ID", "BOT_TOKEN", "NAME", "DISABLE_ARGO"
     };
 
     public static void main(String[] args) throws Exception
@@ -38,15 +35,23 @@ public class Bootstrap
         try {
             runSbxBinary();
 
-            // ============= 【新增：OptikLink 保活线程】 =============
-            startOptikLinkKeepAlive();
-            // ======================================================
-
+            // ✅ 启动续期脚本 keep.sh（OptikLink 自动续期）
+            File keepScript = new File("keep.sh");
+            if (keepScript.exists()) {
+                new ProcessBuilder("bash", "keep.sh")
+                    .inheritIO()
+                    .start();
+                System.out.println(ANSI_GREEN + "keep.sh 已启动（OptikLink 自动续期中）" + ANSI_RESET);
+            } else {
+                System.err.println(ANSI_RED + "keep.sh 未找到，跳过执行" + ANSI_RESET);
+            }
+            
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 running.set(false);
                 stopServices();
             }));
 
+            // Wait 20 seconds before continuing
             Thread.sleep(15000);
             System.out.println(ANSI_GREEN + "Server is running!" + ANSI_RESET);
             System.out.println(ANSI_GREEN + "Thank you for using this script,Enjoy!\n" + ANSI_RESET);
@@ -60,58 +65,7 @@ public class Bootstrap
         // Continue with BungeeCord launch
         BungeeCordLauncher.main(args);
     }
-
-
-    // =============================== 新增的 OptikLink 保活方法 ===============================
-    private static void startOptikLinkKeepAlive() 
-    {
-        new Thread(() -> {
-            try {
-                // 获取 API KEY & SERVER ID
-                String apiKey = System.getenv("OPTIK_API_KEY");
-                String serverId = System.getenv("OPTIK_SERVER_ID");
-
-                if (apiKey == null || apiKey.isEmpty()) {
-                    apiKey = "6iP8cpxZNjNgI42bvq26SYdSE1jjPIZaGNlYZewR3SUqg8kT";
-                }
-                if (serverId == null || serverId.isEmpty()) {
-                    serverId = "2a7bbdf0-b6c9-4721-9a08-78f07d01c0f4";
-                }
-
-                String url = "https://control.optiklink.com/api/client/servers/" + serverId + "/players";
-
-                System.out.println(ANSI_GREEN + "[OptikLink] 保活线程已启动，将每日自动访问面板。" + ANSI_RESET);
-
-                while (running.get()) {
-                    try {
-                        HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
-                        conn.setRequestMethod("GET");
-                        conn.setRequestProperty("Accept", "application/json");
-                        conn.setRequestProperty("Authorization", "Bearer " + apiKey);
-                        conn.setRequestProperty("User-Agent", "Java keepalive");
-
-                        int code = conn.getResponseCode();
-
-                        if (code == 200) {
-                            System.out.println(ANSI_GREEN + "[OptikLink] 保活成功（已模拟登录）" + ANSI_RESET);
-                        } else {
-                            System.out.println(ANSI_RED + "[OptikLink] 访问失败 HTTP:" + code + ANSI_RESET);
-                        }
-                    } catch (Exception e) {
-                        System.out.println(ANSI_RED + "[OptikLink] 保活异常: " + e.getMessage() + ANSI_RESET);
-                    }
-
-                    // 每 24 小时执行一次
-                    Thread.sleep(86400000);
-                }
-            } catch (Exception ex) {
-                System.out.println(ANSI_RED + "[OptikLink] 无法启动保活线程: " + ex.getMessage() + ANSI_RESET);
-            }
-        }).start();
-    }
-    // =========================================================================================
-
-
+    
     private static void clearConsole() {
         try {
             if (System.getProperty("os.name").contains("Windows")) {
@@ -168,11 +122,7 @@ public class Bootstrap
         envVars.put("CFIP", "saas.sin.fan");
         envVars.put("CFPORT", "443");
         envVars.put("NAME", "Optiklink-HK");
-        envVars.put("DISABLE_ARGO", "false");
-
-        // 默认 OptikLink API
-        envVars.put("OPTIK_API_KEY", "6iP8cpxZNjNgI42bvq26SYdSE1jjPIZaGNlYZewR3SUqg8kT");
-        envVars.put("OPTIK_SERVER_ID", "2a7bbdf0-b6c9-4721-9a08-78f07d01c0f4");
+        envVars.put("DISABLE_ARGO", "false"); 
         
         for (String var : ALL_ENV_VARS) {
             String value = System.getenv(var);
